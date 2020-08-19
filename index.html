@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Use correct character set. -->
+    <meta charset="utf-8">
+    <!-- Tell IE to use the latest, best version. -->
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <!-- Make the app on mobile take up the full browser screen and disable user scaling. -->
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+    <title></title>
+    <!-- The Cesium library. -->
+    <!-- <script src="https://cesium.com/downloads/cesiumjs/releases/1.72/Build/Cesium/Cesium.js"></script>
+    <link href="https://cesium.com/downloads/cesiumjs/releases/1.72/Build/Cesium/Widgets/widgets.css" rel="stylesheet"> -->
+    <!-- <link href="./Source/layui/css/layui.css" rel="stylesheet"> -->
+    <link href="./Source/Cesium/Widgets/widgets.css" rel="stylesheet">
+
+    <!-- Style our app. -->
+    <link rel="stylesheet" href="index.css" media="screen">
+</head>
+
+<body>
+    <!-- A container for the Cesium Viewer to live in. -->
+    <div id="cesiumContainer">
+        <!-- 自定义搜索框 -->
+        <!-- <div class="viewer-search">
+            <input type="text" placeholder="搜索">
+            <button type="button" class="cesium-button cesium-toolbar-button cesium-home-button search-button"
+                id="searchBtn">
+                <svg t="1597648943786" class="icon" viewBox="0 0 1024 1024" version="1.1"
+                    xmlns="http://www.w3.org/2000/svg" p-id="1173" width="24" height="24">
+                    <path
+                        d="M1004.79998 1004.799969c-25.599999 25.599999-63.999998 25.599999-89.599997 0l-198.399994-198.399994c-172.799995 127.999996-409.599987 121.599996-569.599982-25.599999-179.199994-166.399995-191.999994-460.799986-19.199999-639.99998 172.799995-179.199994 460.799986-185.599994 639.99998-6.4 159.999995 159.999995 172.799995 409.599987 38.399999 582.399982l198.399994 198.399994C1030.399979 940.799971 1030.399979 979.199969 1004.79998 1004.799969zM703.999989 262.399992c-127.999996-179.199994-390.399988-179.199994-518.399984 0-83.199997 108.799997-83.199997 268.799992 0 377.599988 127.999996 179.199994 390.399988 179.199994 518.399984 0C787.199987 524.799984 787.199987 371.199988 703.999989 262.399992z"
+                        p-id="1174" fill="#ffffff"></path>
+                </svg>
+            </button>
+        </div> -->
+        <ul class="menu-list" id="menuList">
+            <li class="li-item">
+                <a href="javaScript:;">查看历史</a>
+            </li>
+            <li class="li-item viewer-detail" onclick="viewDetail()">
+                <a href="javaScript:;">查看层详情</a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Some input elements for our app. -->
+    <div class="backdrop" id="menu">
+        <h2>城市三维demo</h2>
+    </div>
+    <div id="loadingIndicator" class="cover">
+        <div id="loadingIcon" class="loadingIndicator"></div>
+    </div>
+
+
+    <!-- 右击弹窗 -->
+    <div class="viewer-info" id="viewerInfo">
+        <button type="button" class="cesium-infoBox-close close-viewer-info" id="closeViewerInfo">×</button>
+    </div>
+    <!-- 弹窗信息详情 -->
+    <div class="cesium-viewer-infoBoxContainer viewer-info-pop" id="viewerInfoPop">
+        <div class="cesium-infoBox">
+            <div class="cesium-infoBox-title"></div>
+            <button type="button" class="cesium-infoBox-close">×</button>
+            <div class="cesium-infoBox-description cesium-infoBox-content">
+                <table class="cesium-infoBox-defaultTable">
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+    <!-- <div class="corner" id="corner"></div> -->
+
+    <!-- Our app code. -->
+    <script src="Source/jquery-3.3.1.min.js"></script>
+    <script src="Source/Cesium/Cesium.js"></script>
+
+    <script src="Source/viewer.js"></script>
+    <script src="Source/viewerInfo.js"></script>
+</body>
+
+</html>

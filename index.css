@@ -1,0 +1,254 @@
+.backdrop {
+    display: inline-block;
+    background: rgba(42, 42, 42, 0.7);
+    border-radius: 5px;
+    border: 1px solid #444;
+    padding: 5px 10px;
+    color: #fff;
+    line-height: 150%;
+    font-size: small;
+}
+
+#heightSliderLabel,
+#heightValue {
+    vertical-align: top;
+}
+
+.backdrop a:link,
+.backdrop a:visited,
+.backdrop a:hover {
+    color: #fff
+}
+
+.loadingIndicator {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-top: -33px;
+    margin-left: -33px;
+    width: 66px;
+    height: 66px;
+    background: url(Source/Images/ajax-loader.gif) center no-repeat;
+}
+
+.cover {
+    display: none;
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.75);
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+#menu {
+    position: absolute;
+    left: 10px;
+    top: 10px;
+}
+
+#menu h2 {
+    margin: 0;
+    padding: 5px;
+    letter-spacing: 1px;
+}
+
+.nowrap {
+    white-space: nowrap;
+}
+
+html,
+body,
+#cesiumContainer {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    font-family: sans-serif;
+    background: #000;
+}
+
+button.cesium-infoBox-camera {
+    display: none;
+}
+
+#3DTiles {
+    padding-top: 10px;
+}
+
+.cesium-widget-credits {
+    /* 去除logo */
+    display: none !important;
+}
+
+/* 右击弹窗样式 */
+.viewer-info {
+    width: 80%;
+    height: 80%;
+    background: rgba(42, 42, 42, 0.7);
+    /* border-radius: 4px; */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: 1px solid #444;
+    display: none;
+    overflow: hidden;
+}
+
+/* .cesium-viewer-toolbar {
+    right: 43px;
+}
+.cesium-viewer-fullscreenContainer {
+    top: 5px;
+    right: 5px;
+    width: auto;
+    height: auto;
+}
+.cesium-button.cesium-fullscreenButton {
+    margin: 2px 3px;
+    border-radius: 14%;
+    width: 32px;
+    height: 32px;
+} */
+.viewer-search {
+    position: absolute;
+    top: 5px;
+    right: 122px;
+    z-index: 9;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.viewer-search input {
+    width: 0;
+    background-color: rgba(40, 40, 40, .7);
+    color: #fff;
+    outline: none;
+    height: 28px;
+    border-radius: 4px 0 0 4px;
+    border: none;
+    /* display: none; */
+    transition: 300ms all;
+}
+
+.viewer-search input.show {
+    /* display: block; */
+    width: 250px;
+    border: solid 1px #444 !important;
+    border-right: 0 !important;
+    padding-left: 4px;
+}
+
+.viewer-search input:focus {
+    border-color: #ea4 !important;
+}
+
+.viewer-search .search-button {
+    margin: 2px 0;
+    border-radius: 4px;
+}
+
+.viewer-search .search-button.active {
+    border-color: #ea4;
+}
+
+.viewer-search .search-button.hover {
+    border-radius: 0 4px 4px 0;
+    border-left: 0;
+}
+
+.layui-layer-page .layui-layer-content {
+    overflow: hidden !important;
+}
+
+/* viewerInfo弹窗样式 */
+.viewer-info .cesium-viewer-toolbar {
+    left: 5px;
+}
+
+.close-viewer-info {
+    z-index: 9;
+}
+
+.viewer-info-pop .cesium-infoBox-description {
+    font-family: sans-serif;
+    font-size: 13px;
+    padding: 4px 10px;
+    margin-right: 4px;
+    color: #edffff;
+    max-height: 600px;
+    overflow-y: auto;
+    font-size: 16px;
+}
+
+.viewer-info-pop .cesium-infoBox-defaultTable {
+    width: 100%;
+    color: #edffff;
+}
+
+.viewer-info-pop .cesium-infoBox-description table {
+    color: #edffff;
+}
+
+.viewer-info-pop .cesium-infoBox-defaultTable tr:nth-child(odd) {
+    background-color: rgba(84, 84, 84, .8);
+}
+
+.viewer-info-pop .cesium-infoBox-defaultTable tr:nth-child(even) {
+    background-color: rgba(84, 84, 84, .25);
+}
+
+.cesium-infoBox-defaultTable th {
+    font-weight: 400;
+    padding: 3px;
+    vertical-align: middle;
+    text-align: center;
+}
+
+.cesium-infoBox-defaultTable td {
+    padding: 3px;
+    vertical-align: middle;
+    text-align: left;
+}
+
+/* 右击菜单样式 */
+.menu-list {
+    background: rgba(43, 44, 47, .6);
+    border: 1px solid #2b2c2f;
+    min-width: 110px;
+    list-style: none;
+    font-size: 14px;
+    position: absolute;
+    padding:0;
+    margin: 0;
+    z-index: 9;
+    border-radius: 2px;
+    display: none;
+}
+
+.menu-list a {
+    border-bottom: 1px solid rgba(128, 128, 128, 0.5);
+    padding: 6px 10px;
+    transition: background-color .25s;
+    display: block;
+    clear: both;
+    font-weight: 400;
+    line-height: 1.6;
+    white-space: nowrap;
+    color: #edffff;
+    text-decoration: none;
+}
+
+.menu-list li:last-child a {
+    border-bottom: none;
+}
+
+.menu-list a:hover {
+    background-color: #444d59;
+    color: #fff;
+    text-decoration: none;
+}
