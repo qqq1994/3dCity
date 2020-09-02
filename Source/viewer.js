@@ -349,29 +349,11 @@ var isSelected = false;//是否选中实体
             if (isLoadFloor) {
                 $("#menuList .viewer-detail a").text("查看层详情");
                 // return;
-            }else{
+            } else {
                 $("#menuList .viewer-detail a").text("查看户详情");
             }
             $("#menuList").show();
-            // console.log("右击菜单");
-            // var menuList = "";
-            // menuList = "<ul class='menu-list'>";
-            // for (const item of eText) {
-            //     menuList += `<li class="li-item">
-            //         <a href="javascript:;">${item.text}</a>
-            //     </li>`
-            // }
-            // menuList += `</ul>`;
-
-            // menuList.style.display = "block";
-            // menuList.style.bottom =
-            //     viewer.canvas.clientHeight - movement.endPosition.y + "px";
-            // menuList.style.left = movement.endPosition.x + "px";
-            // $("#cesiumContainer").append(menuList);
-            // $("#viewerInfo").fadeIn();
-            // getViewerInfo(pickedFeature);
             event.stopPropagation();
-
         },
             Cesium.ScreenSpaceEventType.RIGHT_CLICK);
 
@@ -533,7 +515,7 @@ function viewDetail() {
     if (isLoadFloor) {
         getFloorData();
         isLoadFloor = false;
-        
+
     } else {
         $("#viewerInfo").fadeIn();
         getViewerInfo();

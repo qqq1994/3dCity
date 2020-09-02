@@ -1,0 +1,112 @@
+{
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            108.39525519159936,
+                            22.813122431730015
+                        ],
+                        [
+                            108.39488050249128,
+                            22.812449833077466
+                        ],
+                        [
+                            108.39519648479454,
+                            22.812344743148024
+                        ],
+                        [
+                            108.39548569965604,
+                            22.813013709594642
+                        ],
+                        [
+                            108.39525519159936,
+                            22.813122431730015
+                        ]
+                    ]
+                ]
+            },
+            "properties": {
+                "OBJECTID": 1,
+                "HGUID": "{78FC167B-A8C1-494C-AD77-97A36E3D373C}",
+                "ZRZGUID": "{9A70B7D4-C604-434F-B524-5927E0524351}",
+                "ZDGUID": "{D95E1DB4-E073-4CCC-8156-B32C0DBF5B8E}",
+                "BDCDYH": "450103005007GB00218F00130014",
+                "CH": "5",
+                "ZL": "南宁市青秀区中越路8号盛天华府B1号楼B2号楼B3号楼商场",
+                "MJDWNAME": "平方米",
+                "SJCS": 1,
+                "HH": 0,
+                "SHBW": "商场",
+                "HXNAME": "其它",
+                "HXJGNAME": "平层",
+                "FWYTNAME1": "商业服务",
+                "JZWZTNAME": "现房",
+                "YCJZMJ": 0,
+                "YCTNJZMJ": 0,
+                "YCFTJZMJ": 0,
+                "YCDXBFJZMJ": 0,
+                "YCQTJZMJ": 0,
+                "YCFTXS": 0,
+                "SCJZMJ": 2888.2,
+                "SCTNJZMJ": 2467.08,
+                "SCFTJZMJ": 421.12,
+                "SCDXBFJZMJ": 0,
+                "SCQTJZMJ": 0,
+                "SCFTXS": 0,
+                "GYTDMJ": 0,
+                "FTTDMJ": 0,
+                "DYTDMJ": 0,
+                "FWLXNAME": "商业用房",
+                "FWXZNAME": "其它",
+                "SJC": 5,
+                "MYC": "5",
+                "DYH": "无",
+                "HXH": "商场",
+                "SYGN": "住宅单元",
+                "QSXZ": "私",
+                "ZDDM": "450103005007GB00218",
+                "SCYTJZMJ": 0,
+                "YCYTJZMJ": 0,
+                "JZMJ": 0,
+                "TNJZMJ": 2480.084798,
+                "FTJZMJ": 0,
+                "DXBFJZMJ": 0,
+                "QTJZMJ": 0,
+                "FTXS": 0,
+                "CQLY": "",
+                "CQZT": "1",
+                "QTGSD": "",
+                "QTGSB": "",
+                "QTGSN": "",
+                "QTGSX": "",
+                "ZCS": 9,
+                "FH": "商场",
+                "QSC": 5,
+                "ZZC": 5,
+                "JGSJ": "1899-11-30T00:00:00.000Z",
+                "GHYT": "31",
+                "CHANB": "私有（自有）房产",
+                "FWLYZT": "1",
+                "QLXZNAME": "出让",
+                "QLLXNAME": "国有建设用地使用权/房屋（构筑物）所有权",
+                "FWJGNAME": "钢筋混凝土结构",
+                "PZYT": "商场",
+                "FJ": "",
+                "BLDROOMID": "838272",
+                "CHZT": 2,
+                "SHAPE_Leng": 224.662272709,
+                "SHAPE_Area": 2487.38352308,
+                "InPoly_FID": 1,
+                "SimPgnFlag": 0,
+                "MaxSimpTol": 9,
+                "MinSimpTol": 9,
+                "height": 18
+            }
+        }
+    ]
+}
