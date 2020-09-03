@@ -5,23 +5,25 @@ var initialOrientation;
 var viewerOptions;
 //监听地图缩放
 //页面加载完成时的高度
-var isFirstMove = true;
+var isFirstLoad = true;
 var loadMagnitude;
 var currentMagnitude;
 var dist = 0;
-var isLoadFloor = true;//加载层数据
-var isSelected = false;//是否选中实体
+var isLoadFloor = false;//是否加载的是层数据
 var bulidType = "zhuang";
-var Xmin, Ymin, Xmax, Ymax;
-var wheelLevel = 5;//初始化滚动级别，默认当前显示级别为5
+var Xmin = 22.80, Ymin = 107, Xmax = 30.25, Ymax = 109;
+var wheelLevel = 1;//初始化滚动级别，默认当前显示级别为5
 var promise;
+var lastDataSource;
+var zrzguid;
+var sjc;
 (function () {
     "use strict";
     viewer = new Cesium.Viewer("cesiumContainer", {
-        terrainProvider: Cesium.createWorldTerrain(),
+        // terrainProvider: Cesium.createWorldTerrain(),
         animation: false, //是否显示动画控件
         homeButton: true, //是否显示home键
-        geocoder: true, //是否显示地名查找控件
+        geocoder: false, //是否显示地名查找控件
         baseLayerPicker: true, //是否显示图层选择控件
         //获取或设置可用于图像选择的ProviderViewModel实例数组。
         imageryProviderViewModels: getImageryProviderArr(),
@@ -38,14 +40,25 @@ var promise;
     });
 
     //移除其他图层
-    viewer.imageryLayers.remove(viewer.imageryLayers.get(0));
+    // viewer.imageryLayers.remove(viewer.imageryLayers.get(0));
 
     //添加图层（底图）
-    viewer.imageryLayers.addImageryProvider(
-        new Cesium.IonImageryProvider({ assetId: 3954 })
-    );
+    // viewer.imageryLayers.addImageryProvider(
+    //     new Cesium.IonImageryProvider({ assetId: 3954 })
+    // );
+    // viewer.imageryLayers.addImageryProvider(new Cesium.WebMapTileServiceImageryProvider({
+    //     url: "http://api.tianditu.gov.cn/api?v=4.0&tk=8b123523b1ce86dbb4ccec8a6d00b3c2",
+    //     layer: "tdtBasicLayer",
+    //     style: "default",
+    //     format: "image/jpeg",
+    //     tileMatrixSetID: "GoogleMapsCompatible",
+    //     show: false
+    // }));
     viewer.scene.globe.depthTestAgainstTerrain = false;
+    // scene.globe.depthTestAgainstTerrain = false;
+
     viewer.scene.globe.enableLighting = true;
+
     translate(viewer);//汉化组件
 
     /**
@@ -59,15 +72,16 @@ var promise;
     viewer.scene.screenSpaceCameraController.tiltEventTypes = [Cesium.CameraEventType.RIGHT_DRAG];//按住右键+拖动
 
     //默认位置
+
     initialPosition = Cesium.Cartesian3.fromDegrees(
-        108.40,
-        22.81,
+        108.383727,
+        22.780040,
         2000
     );
     initialOrientation = new Cesium.HeadingPitchRoll.fromDegrees(
-        7.1077496389876024807,
-        -31.987223091598949054,
-        0.025883251314954971306
+        18.1077496389876024807,
+        -18.987223091598949054,
+        0.825883251314954971306
     );
     //主页视图
     var homeCameraView = {
@@ -102,67 +116,28 @@ var promise;
         orientation: initialOrientation,
         endTransform: Cesium.Matrix4.IDENTITY,
     });
-
-    // var promise = Cesium.GeoJsonDataSource.load('http://10.0.2.148:8081/service/DataSets?buildingType=zhuang&Xmin=22.80&Xmax=30.25&Ymin=107&Ymax=109');
-    // promise = Cesium.GeoJsonDataSource.load(`${port}service/DataSets?buildingType=zhuang10&Xmin=22.80&Xmax=30.25&Ymin=107&Ymax=109`);
-    //  promise = Cesium.GeoJsonDataSource.load(`${port}service/getHuData?zrzguid={9A70B7D4-C604-434F-B524-5927E0524351}11&sjc=6`);
-    // 
-    // promise = Cesium.GeoJsonDataSource.load('./Source/SampleData/building9.json');
     //加载幢/层数据
-    // var promise;
     function loadData(type, Xmin, Xmax, Ymin, Ymax) {
-        // promise = Cesium.GeoJsonDataSource.load(`${port}service/DataSets?buildingType=${type}&Xmin=${Xmin}&Xmax=${Xmax}&Ymin=${Ymin}&Ymax=${Ymax}`);
-        promise = Cesium.GeoJsonDataSource.load('./Source/SampleData/building9.json');
+        $("#cesiumContainer .cesium-infoBox").removeClass("cesium-infoBox-visible");//每次加载新数据时都隐藏掉信息框
+        promise = Cesium.GeoJsonDataSource.load(`${port}service/DataSets?buildingType=${type}&Xmin=${Xmin}&Xmax=${Xmax}&Ymin=${Ymin}&Ymax=${Ymax}`);
         promise.then(function (dataSource) {
+            viewer.dataSources.remove(lastDataSource);
+            lastDataSource = dataSource;
             viewer.dataSources.add(dataSource);
             var entities = dataSource.entities.values;
-            var colorHash = {};
-            console.log(entities[0])
             //可对单个实体进行设置
             for (var i = 0; i < entities.length; i++) {
                 var entity = entities[i];
-                var name = entity.name;
                 entity.nameId = i;
-                var color = colorHash[name];
-                if (!color) {
-                    color = Cesium.Color.fromRandom({
-                        alpha: 1
-                    });
-                    colorHash[name] = color;
-                }
-                entity.polygon.material = color;
+                entity.polygon.material = Cesium.Color.BLUE;
                 entity.polygon.outline = false;
-                // entity.polygon.extrudedHeight = 500;
-                entity.polygon.extrudedHeight = entity.properties.height;
+                // entity.polygon.extrudedHeight = 300;
+                entity.polygon.extrudedHeight = entity.properties.HEIGHT;
             }
         });
-        viewer.flyTo(promise);
+        // viewer.flyTo(promise);
     }
-    // promise.then(function (dataSource) {
-    //     viewer.dataSources.add(dataSource);
-    //     var entities = dataSource.entities.values;
-    //     var colorHash = {};
-    //     console.log(entities[0])
-    //     //可对单个实体进行设置
-    //     for (var i = 0; i < entities.length; i++) {
-    //         var entity = entities[i];
-    //         var name = entity.name;
-    //         entity.nameId = i;
-    //         var color = colorHash[name];
-    //         if (!color) {
-    //             color = Cesium.Color.fromRandom({
-    //                 alpha: 1
-    //             });
-    //             colorHash[name] = color;
-    //         }
-    //         entity.polygon.material = color;
-    //         entity.polygon.outline = false;
-    //         // entity.polygon.extrudedHeight = 500;
-    //         entity.polygon.extrudedHeight = entity.properties.height;
-    //     }
-    // });
     // viewer.flyTo(promise);
-
 
     //获取屏幕经纬度
     var w = $(window).width();//网页可视区域的宽
@@ -174,25 +149,31 @@ var promise;
     })
     //监听地球加载
     var helper = new Cesium.EventHelper();
-    var time = 0;
     helper.add(viewer.scene.globe.tileLoadProgressEvent, function (event) {
         if (event == 0) {//地球加载完成
-            console.log("加载完成");
             //屏幕坐标
             var pt1 = new Cesium.Cartesian2(0, 0);
             var pt2 = new Cesium.Cartesian2(w, h);
+            var pt3 = new Cesium.Cartesian2(0, h);
+            var pt4 = new Cesium.Cartesian2(w, 0);
+
             //笛卡尔空间直角坐标
             var pick1 = viewer.scene.globe.pick(viewer.camera.getPickRay(pt1), viewer.scene);
             var pick2 = viewer.scene.globe.pick(viewer.camera.getPickRay(pt2), viewer.scene);
+
+            var pick3 = viewer.scene.globe.pick(viewer.camera.getPickRay(pt3), viewer.scene);
+            var pick4 = viewer.scene.globe.pick(viewer.camera.getPickRay(pt4), viewer.scene);
             //转换为经纬度
             var geoPt1 = viewer.scene.globe.ellipsoid.cartesianToCartographic(pick1);
             var geoPt2 = viewer.scene.globe.ellipsoid.cartesianToCartographic(pick2);
+
+            var geoPt3 = viewer.scene.globe.ellipsoid.cartesianToCartographic(pick3);
+            var geoPt4 = viewer.scene.globe.ellipsoid.cartesianToCartographic(pick4);
             Xmax = Cesium.Math.toDegrees(geoPt1.latitude);//纬度最大
             Ymin = Cesium.Math.toDegrees(geoPt1.longitude)//经度最小
             Xmin = Cesium.Math.toDegrees(geoPt2.latitude);//纬度最小
             Ymax = Cesium.Math.toDegrees(geoPt2.longitude)//经度最大
-            // debugger
-            // loadData(bulidType, Xmin, Xmax, Ymin, Ymax);
+            loadData(bulidType, Xmin, Xmax, Ymin, Ymax);
         }
     });
 
@@ -210,22 +191,16 @@ var promise;
 
     // 当前选中的信息
     var highlightFace = false;
-    var moveFace = false;
-
     // 创建一个实体对象
     var selectedEntity = new Cesium.Entity();
-
     // 获取默认的左击事件，用于左击未选择功能时
     var clickHandler = viewer.screenSpaceEventHandler.getInputAction(
         Cesium.ScreenSpaceEventType.LEFT_CLICK
     );
-
     // 如果支持轮廓，则鼠标悬停时轮廓特征为蓝色，单击鼠标时轮廓为绿色
     if (
         Cesium.PostProcessStageLibrary.isSilhouetteSupported(viewer.scene)
     ) {
-
-        // 在悬停时为蓝色轮廓
         viewer.screenSpaceEventHandler.setInputAction(function onMouseMove(
             movement
         ) {
@@ -233,27 +208,18 @@ var promise;
             var pickedFeature = viewer.scene.pick(movement.endPosition);
             if (!Cesium.defined(pickedFeature)) {
                 nameOverlay.style.display = "none";
-                // if (moveFace) {//是否存在高亮面
-                //     moveFace.material = moveFace.material0;
-                // }
-                // moveFace = false;
                 return;
             }
-            // if (moveFace) {//是否存在高亮面
-            //     return;
-            // }
-            // pickedFeature.id.polygon.material0 = pickedFeature.id.polygon.material;
-            // pickedFeature.id.polygon.material = Cesium.Color.LIME;
-            // moveFace = pickedFeature.id.polygon;
-            // linehHghtlight(pickedFeature.id);
-
             // 悬停时显示label
             nameOverlay.style.display = "block";
             nameOverlay.style.bottom =
                 viewer.canvas.clientHeight - movement.endPosition.y + "px";
             nameOverlay.style.left = movement.endPosition.x + "px";
-            var name = pickedFeature.id.properties.sjc;
-            nameOverlay.textContent = name;
+            if (bulidType === "zhuang") {//幢数据
+                nameOverlay.textContent = pickedFeature.id.properties.HEIGHT + "米";;
+            } else {//层数据
+                nameOverlay.textContent = pickedFeature.id.properties.SJC + "层";
+            }
         },
             Cesium.ScreenSpaceEventType.MOUSE_MOVE);
 
@@ -261,71 +227,48 @@ var promise;
         viewer.screenSpaceEventHandler.setInputAction(function onLeftClick(
             movement
         ) {
-            //获取屏幕坐标
-            // var windowPosition = movement.position;
-            // console.log(windowPosition);
-            // //转换为笛卡尔空间直角坐标
-            // var ray = viewer.camera.getPickRay(windowPosition);
-            // var cartesian = viewer.scene.globe.pick(ray, viewer.scene);
-            // console.log(cartesian);
-
-
-            // //三维笛卡尔空间直角坐标转换为地理坐标（经纬度）
-            // var ellipsoid = viewer.scene.globe.ellipsoid;
-            // var cartographic = ellipsoid.cartesianToCartographic(cartesian);
-            // var lat = Cesium.Math.toDegrees(cartographic.latitude);
-            // var lng = Cesium.Math.toDegrees(cartographic.longitude);
-            // var alt = cartographic.height;
-            // console.log(lat, lng, alt);
-
-
-            $("#menuList").hide();
+            $("#menuList").hide();//不管当前是否显示右击时的菜单一律隐藏
             var pickedFeature = viewer.scene.pick(movement.position);
-            // 清空选中
-            isSelected = false;
             if (highlightFace) {//是否存在高亮面
                 highlightFace.material = highlightFace.material0;
             }
-            if (!Cesium.defined(pickedFeature)) {
+            if (!Cesium.defined(pickedFeature)) {//点击非实体区域时
                 clickHandler(movement);
-                $("#viewerInfo").fadeOut();
-                $("#viewerInfoPop .cesium-infoBox").removeClass("cesium-infoBox-visible");
-                isSelected = false;
-                // if (highlightFace) {//是否存在高亮面
-                //     highlightFace.material = highlightFace.material0;
-                // }
+                $("#viewerInfo").fadeOut();//不管当前是否显示户数据弹窗一律隐藏
+                $("#cesiumContainer .cesium-infoBox").removeClass("cesium-infoBox-visible");//隐藏信息框
                 highlightFace = false;
                 return;
             }
-            // if (highlightFace) {//是否存在高亮面
-            //     return;
-            // }
+            $("#cesiumContainer .cesium-infoBox").addClass("cesium-infoBox-visible");
             pickedFeature.id.polygon.material0 = pickedFeature.id.polygon.material;
             pickedFeature.id.polygon.material = new Cesium.Color(255, 1, 1, .8);
-            // pickedFeature.id.polygon.material = Cesium.Color.RED;
 
             highlightFace = pickedFeature.id.polygon;
             linehHghtlight(pickedFeature.id);
 
             // // 设置所选实体显示的功能信息框
-            var featureName = pickedFeature.id.properties.ZL;
-            selectedEntity.name = featureName;
             selectedEntity.description =
                 'Loading <div class="cesium-infoBox-loading"></div>';
             viewer.selectedEntity = selectedEntity;
             var descriptionStr = '<table class="cesium-infoBox-defaultTable"><tbody>';
             var property = pickedFeature.id.properties;
-            var date = /\d{4}-\d{1,2}-\d{1,2}/g.exec(property.JGSJ);
-
-            descriptionStr += "<tr><th>FWLXNAME</th><td>" + property.FWLXNAME + "</td></tr>";
-            descriptionStr += "<tr><th>SYGN</th><td>" + property.SYGN + "</td></tr>";
-            descriptionStr += "<tr><th>CHANB</th><td>" + property.CHANB + "</td></tr>";
-            descriptionStr += "<tr><th>sjc</th><td>" + property.sjc + "</td></tr>";
-            descriptionStr += "<tr><th>QLLXNAME</th><td>" + property.QLLXNAME + "</td></tr>";
-            descriptionStr += "<tr><th>JGSJ</th><td>" + date + "</td></tr>";
-            descriptionStr += "<tr><th>ZDDM</th><td>" + property.ZDDM + "</td></tr>";
-            descriptionStr += "<tr><th>BLDROOMID</th><td>" + property.BLDROOMID + "</td></tr>";
-            descriptionStr += "<tr><th>height</th><td>" + property.height + "</td></tr>";
+            selectedEntity.name = property.ZDGUID;
+            descriptionStr += "<tr><th>OBJECTID</th><td>" + property.OBJECTID + "</td></tr>";
+            descriptionStr += "<tr><th>ZDGUID</th><td>" + property.ZDGUID + "</td></tr>";
+            descriptionStr += "<tr><th>OBJECTID_1</th><td>" + property.OBJECTID_1 + "</td></tr>";
+            descriptionStr += "<tr><th>Z_MEAN</th><td>" + property.Z_MEAN + "</td></tr>";
+            descriptionStr += "<tr><th>ZCS</th><td>" + property.ZCS + "</td></tr>";
+            descriptionStr += "<tr><th>ID</th><td>" + property.ID + "</td></tr>";
+            descriptionStr += "<tr><th>HEIGHT</th><td>" + property.HEIGHT + "</td></tr>";
+            descriptionStr += "<tr><th>SPLIT</th><td>" + property.SPLIT + "</td></tr>";
+            descriptionStr += "<tr><th>Z_MIN</th><td>" + property.Z_MIN + "</td></tr>";
+            descriptionStr += "<tr><th>ZRZGUID</th><td>" + property.ZRZGUID + "</td></tr>";
+            descriptionStr += "<tr><th>Z_MAX</th><td>" + property.Z_MAX + "</td></tr>";
+            if (bulidType === "zhuang") {//幢数据
+                descriptionStr += "<tr><th>ZRZGUID2</th><td>" + property.ZRZGUID2 + "</td></tr>";
+            } else {//层数据
+                descriptionStr += "<tr><th>SJC</th><td>" + property.SJC + "</td></tr>";
+            }
             descriptionStr += "</tbody></table>";
             selectedEntity.description = descriptionStr;
         },
@@ -335,16 +278,27 @@ var promise;
         viewer.screenSpaceEventHandler.setInputAction(function onRightClick(
             movement
         ) {
-            silhouetteGreen.selected = [];
             $("#cesiumContainer .cesium-infoBox").removeClass("cesium-infoBox-visible");
             var pickedFeature = viewer.scene.pick(movement.position);
             if (!Cesium.defined(pickedFeature)) {
                 $("#menuList").hide();
                 return;
             }
-            if (silhouetteGreen.selected[0] === pickedFeature) {
-                return;
+            doProhibit();//禁用浏览器右击菜单
+            var top = movement.position.y + "px";
+            var left = movement.position.x + "px";
+            $("#menuList").css({
+                "left": left,
+                "top": top
+            })
+            if (bulidType === "zhuang") {//幢数据
+                $("#menuList .viewer-detail a").text("查看层详情");
+            } else {//层数据
+                $("#menuList .viewer-detail a").text("查看户详情");
+                zrzguid = pickedFeature.id.properties.ZRZGUID;
+                sjc = pickedFeature.id.properties.SJC;
             }
+            $("#menuList").show();
             event.stopPropagation();
         },
             Cesium.ScreenSpaceEventType.RIGHT_CLICK);
@@ -360,47 +314,96 @@ var promise;
         }
     }
     //监听滚轮滚动
-    $(document).mousewheel(function (e, d) {//d=1 上; d=-1 下
+    $("#cesiumContainer").mousewheel(function (e, d) {//d=1 上; d=-1 下
+        $("#menuList").hide();
         wheelLevel += d;
+        console.log(wheelLevel);
         if (d === 1) {//放大
-            if (wheelLevel > 9) {
-                wheelLevel = 10;
+            if (wheelLevel > 10) {
+                wheelLevel = 9;
                 viewer.scene.screenSpaceCameraController.enableZoom = false;
             }
-        } else {//缩小
-            console.log("缩小");
-            if (wheelLevel < 0) {
+            if (wheelLevel < 9) {
+                viewer.scene.screenSpaceCameraController.enableZoom = true;
+            }
+        }
+        else {//缩小
+            if (wheelLevel < 10) {
+                viewer.scene.screenSpaceCameraController.enableZoom = true;
+            }
+            if (wheelLevel < 1) {
                 wheelLevel = 1;
                 viewer.scene.screenSpaceCameraController.enableZoom = false;
             }
         }
-
-        viewer.scene.screenSpaceCameraController.enableZoom = true;
-
-        // viewer.scene.screenSpaceCameraController.enableZoom = true;
-        // // 如果为真，则允许用户旋转相机。如果为假，相机将锁定到当前标题。此标志仅适用于2D和3D。
-        // scene.screenSpaceCameraController.enableRotate = false;
-        // // 如果为true，则允许用户平移地图。如果为假，相机将保持锁定在当前位置。此标志仅适用于2D和Columbus视图模式。
-        // scene.screenSpaceCameraController.enableTranslate = false;
-        // // 如果为真，允许用户放大和缩小。如果为假，相机将锁定到距离椭圆体的当前距离
-        // scene.screenSpaceCameraController.enableZoom = false;
-        // // 如果为真，则允许用户倾斜相机。如果为假，相机将锁定到当前标题。这个标志只适用于3D和哥伦布视图。
-        // scene.screenSpaceCameraController.enableTilt = false;
-        // console.log(viewer.scene.screenSpaceCameraController.enableZoom);
-
+        if (wheelLevel === 6) {
+            bulidType = "ceng";
+        }
+        if (wheelLevel === 5) {
+            bulidType = "zhuang";
+        }
     });//wheel结束
+
+    var searchArr = ["栗子","苹果","梨子"];
+
+    //自定义搜索框事件方法
+    var isClickBtn = false;
+    $("#searchBtn").hover(function () {
+        $(this).addClass("hover");
+        $(".viewer-search input").addClass("show");
+        $(".viewer-search input").focus();
+    })
+    $("#searchBtn").click(function () {
+        // console.log()
+        if ($(".viewer-search input").val() == "") {
+            // $(".viewer-search input").focus();
+            isClickBtn = true;
+            console.log(1111111111);
+        }
+    })
+    $(".viewer-search input").focus(function () {
+        $("#searchBtn").addClass("active");
+    })
+    $(".viewer-search input").blur(function () {
+        if (!isClickBtn) {
+            if ($(this).val() == "") {
+                $(".viewer-search input").removeClass("show");
+                setTimeout(function () {
+                    $("#searchBtn").removeClass("active hover");
+                }, 300)
+            }
+        }
+        $("#searchBtn").removeClass("active");
+    })
 }());
 //右击菜单监听选择查看层/户详情
 function viewDetail() {
-    if (isLoadFloor) {
-        getFloorData();
-        isLoadFloor = false;
-    } else {
-        // $("#viewerInfo").fadeIn();
-        // getViewerInfo();
-    }
     $("#menuList").hide();
+    if (bulidType === "ceng") {
+        $("#viewerInfo").fadeIn();
+        getViewerInfo(zrzguid, sjc);
+    } else {
+        bulidType = "zhuang";
+    }
 }
+
+//循环删除多个实体lable
+function deleteLabel(viewer) {
+    var entitys = viewer.entities._entities._array;
+    console.log("====删除实体");
+    console.log(entitys.length);
+    console.log(entitys);
+    for (var i = 0; i < entitys.length; i++) {
+        if (entitys[i]._name === "lablebill") {
+            console.log("i=" + i);
+            console.log(entitys[i]._name);
+            console.log(entitys[i]._id);
+            viewer.entities.remove(entitys[i]);
+            i--;
+        }
+    }
+}
+
 
 // 禁用浏览器右键菜单
 function doProhibit() {
@@ -501,7 +504,7 @@ function getTerrainProviderViewModelsArr() {
 function translate(view) {
     //汉化组件
     view.homeButton.viewModel.tooltip = "初始位置";
-    view.geocoder.container.getElementsByClassName('cesium-geocoder-input')[0].setAttribute("placeholder", "输入地址或地标…");
+    // view.geocoder.container.getElementsByClassName('cesium-geocoder-input')[0].setAttribute("placeholder", "输入地址或地标…");
     view.navigationHelpButton.viewModel.tooltip = "操作指南";
     var clickHelper = view.navigationHelpButton.container.getElementsByClassName("cesium-click-navigation-help")[0];
     var touchHelper = view.navigationHelpButton.container.getElementsByClassName("cesium-touch-navigation-help")[0];
@@ -535,3 +538,6 @@ function translate(view) {
     touch_help_rotate.innerHTML = "旋转";
     touch_help_rotate.parentNode.getElementsByClassName("cesium-navigation-help-details")[0].innerHTML = "双指反向拖动";
 }
+
+
+

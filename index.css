@@ -98,8 +98,8 @@ button.cesium-infoBox-camera {
     overflow: hidden;
 }
 
-/* .cesium-viewer-toolbar {
-    right: 43px;
+.cesium-viewer-toolbar {
+    right: 5px;
 }
 .cesium-viewer-fullscreenContainer {
     top: 5px;
@@ -112,7 +112,7 @@ button.cesium-infoBox-camera {
     border-radius: 14%;
     width: 32px;
     height: 32px;
-} */
+}
 .viewer-search {
     position: absolute;
     top: 5px;
@@ -160,10 +160,33 @@ button.cesium-infoBox-camera {
     border-radius: 0 4px 4px 0;
     border-left: 0;
 }
-
-.layui-layer-page .layui-layer-content {
-    overflow: hidden !important;
+.search-box {
+    position: absolute;
+    top: 38px;
+    left: 0;
+    width: 255px;
+    height: 200px;
+    background-color: rgba(40, 40, 40, .7);
+    border: solid 1px #444 !important;
+    border-radius: 4px;
+    padding: 6px;
+    display: none;
 }
+.search-item {
+    padding: 5px;
+    color: #bababa;
+    font-size: 14px;
+    border-radius: 2px;
+    cursor: pointer;
+}
+.search-selected {
+    color: #fff;
+    background-color: #e8e9e72e;
+}
+
+/* .layui-layer-page .layui-layer-content {
+    overflow: hidden !important;
+} */
 
 /* viewerInfo弹窗样式 */
 .viewer-info .cesium-viewer-toolbar {
@@ -223,7 +246,7 @@ button.cesium-infoBox-camera {
     list-style: none;
     font-size: 14px;
     position: absolute;
-    padding:0;
+    padding: 0;
     margin: 0;
     z-index: 9;
     border-radius: 2px;
@@ -251,4 +274,14 @@ button.cesium-infoBox-camera {
     background-color: #444d59;
     color: #fff;
     text-decoration: none;
+}
+
+.loading {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    /* width: 50px;
+    height: 50px; */
+    /* border-radius: 50%; */
+    /* background-color: rgba(42, 42, 42, 0.7); */
 }

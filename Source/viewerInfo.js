@@ -8,7 +8,7 @@ var viewerInfo = new Cesium.Viewer("viewerInfo", {
     timeline: false, //是否显示时间线控件
     fullscreenButton: false, //是否全屏显示
     scene3DOnly: true, //如果设置为true，则所有几何图形以3D模式绘制以节约GPU资源
-    infoBox: true, //是否显示点击要素之后显示的信息
+    infoBox: false, //是否显示点击要素之后显示的信息
     sceneModePicker: true, //是否显示投影方式控件  三维/二维
     navigationInstructionsInitiallyVisible: false,
     navigationHelpButton: false, //是否显示帮助信息控件
@@ -63,12 +63,9 @@ $(function () {
     nameInfoOverlay.style["pointer-events"] = "none";
     nameInfoOverlay.style.padding = "4px";
     nameInfoOverlay.style.backgroundColor = "black";
-    var selected = {
-        feature: undefined,
-        originalColor: new Cesium.Color(),
-    };
-    var selectedInfoEntity = new Cesium.Entity();
 
+    // var selectedInfoEntity = new Cesium.Entity();
+    var highlightDoor = false;
     // Get default left click handler for when a feature is not picked on left click
     // 获取默认的左击事件，用于左击未选择功能时
     var clickHandler = viewerInfo.screenSpaceEventHandler.getInputAction(
@@ -78,109 +75,85 @@ $(function () {
     if (
         Cesium.PostProcessStageLibrary.isSilhouetteSupported(viewerInfo.scene)
     ) {
-        // Silhouettes are supported
-        //支持
-        var silhouetteInfoBlue = Cesium.PostProcessStageLibrary.createEdgeDetectionStage();
-        silhouetteInfoBlue.uniforms.color = Cesium.Color.BLUE;
-        silhouetteInfoBlue.uniforms.length = 0.01;
-        silhouetteInfoBlue.selected = [];
 
-        var silhouetteInfoGreen = Cesium.PostProcessStageLibrary.createEdgeDetectionStage();
-        silhouetteInfoGreen.uniforms.color = Cesium.Color.LIME;
-        silhouetteInfoGreen.uniforms.length = 0.01;
-        silhouetteInfoGreen.selected = [];
-
-        viewerInfo.scene.postProcessStages.add(
-            Cesium.PostProcessStageLibrary.createSilhouetteStage([
-                silhouetteInfoBlue,
-                silhouetteInfoGreen,
-            ])
-        );
         // Silhouette a feature blue on hover.
         // 在悬停时为蓝色轮廓
         viewerInfo.screenSpaceEventHandler.setInputAction(function onMouseMove(
             movement
         ) {
-            // If a feature was previously highlighted, undo the highlight
-            // 取消选中实体
-            silhouetteInfoBlue.selected = [];
-
-            // Pick a new feature
             // 选择实体
             var pickedFeature = viewerInfo.scene.pick(movement.endPosition);
             if (!Cesium.defined(pickedFeature)) {
                 nameInfoOverlay.style.display = "none";
                 return;
             }
+            console.log(pickedFeature);
 
-            // A feature was picked, so show it's overlay content
             // 悬停时显示label
             nameInfoOverlay.style.display = "block";
             nameInfoOverlay.style.bottom =
                 viewerInfo.canvas.clientHeight - movement.endPosition.y + "px";
             nameInfoOverlay.style.left = movement.endPosition.x + "px";
-            var name = pickedFeature.getProperty("id");
+            var name = pickedFeature.id.properties.SJC;
             nameInfoOverlay.textContent = name;
-
-            // Highlight the feature if it's not already selected.
-            // 高亮没有被选中的实体
-            if (pickedFeature !== selected.feature) {
-                silhouetteInfoBlue.selected = [pickedFeature];
-            }
         },
             Cesium.ScreenSpaceEventType.MOUSE_MOVE);
 
-        // Silhouette a feature on selection and show metadata in the InfoBox.
         // 选中实体并在信息框中显示信息
         viewerInfo.screenSpaceEventHandler.setInputAction(function onLeftClick(
             movement
         ) {
-            // If a feature was previously selected, undo the highlight
-            // 清空选中
-            silhouetteInfoGreen.selected = [];
-
-            // Pick a new feature
-            // 选择实体
+            $("#cesiumContainer .cesium-infoBox").removeClass("cesium-infoBox-visible");
             var pickedFeature = viewerInfo.scene.pick(movement.position);
+            // 清空选中
+            if (highlightDoor) {//是否存在高亮面
+                highlightDoor.material = highlightDoor.material0;
+            }
             if (!Cesium.defined(pickedFeature)) {
                 clickHandler(movement);
+                $("#cesiumContainer .cesium-infoBox").removeClass("cesium-infoBox-visible");
                 $("#viewerInfoPop .cesium-infoBox").removeClass("cesium-infoBox-visible");
                 return;
             }
 
-            // Select the feature if it's not already selected
-            // 选择实体（如果该实体之前没有被选中）
-            if (silhouetteInfoGreen.selected[0] === pickedFeature) {
-                return;
-            }
+            pickedFeature.id.polygon.material0 = pickedFeature.id.polygon.material;
+            pickedFeature.id.polygon.material = new Cesium.Color(255, 1, 1, .8);
+            highlightDoor = pickedFeature.id.polygon;
+            linehHghtDoor(pickedFeature.id);
 
-            // Save the selected feature's original color
-            // 保存所选实体的原始颜色
-            var highlightedFeature = silhouetteInfoBlue.selected[0];
-            if (pickedFeature === highlightedFeature) {
-                silhouetteInfoBlue.selected = [];
-            }
-
-            // Highlight newly selected feature
-            // 选择的实体设置高亮
-            silhouetteInfoGreen.selected = [pickedFeature];
-            // Set feature infobox description
-            // 设置所选实体显示的功能信息框
-            var featureName = pickedFeature.getProperty("name");
-            selectedInfoEntity.name = featureName;
-            $("#viewerInfoPop .cesium-infoBox").addClass("cesium-infoBox-visible");
-            var fileds = pickedFeature.getPropertyNames();
-            $("#viewerInfoPop .cesium-infoBox-title").text(pickedFeature.getProperty(fileds[0]));
+            // // 设置所选实体显示的功能信息框
+            var featureName = pickedFeature.id.properties.ZL;
+            var property = pickedFeature.id.properties;
+            // var fileds = pickedFeature.id.properties.propertyNames;
+            $("#viewerInfoPop .cesium-infoBox-title").text(featureName);
             var _trHTML = "";
-            for (var i in fileds) {
-                _trHTML += `<tr>
-                    <th>${fileds[i]}</th>
-                    <td>${pickedFeature.getProperty(fileds[i])}</td>
-                </tr>`
-            }
+            _trHTML += `<tr><th>PZYT</th><td>${property.PZYT}</td></tr>`;
+            _trHTML += `<tr><th>QSXZ</th><td>${property.QSXZ}</td></tr>`;
+            _trHTML += `<tr><th>JZWZTNAME</th><td>${property.JZWZTNAME}</td></tr>`;
+            _trHTML += `<tr><th>FWXZNAME</th><td>${property.FWXZNAME}</td></tr>`;
+            _trHTML += `<tr><th>BDCDYH</th><td>${property.BDCDYH}</td></tr>`;
+            _trHTML += `<tr><th>HXJGNAME</th><td>${property.HXJGNAME}</td></tr>`;
+            _trHTML += `<tr><th>QLLXNAME</th><td>${property.QLLXNAME}</td></tr>`;
+            _trHTML += `<tr><th>FWJGNAME</th><td>${property.FWJGNAME}</td></tr>`;
+            _trHTML += `<tr><th>SCFTJZMJ</th><td>${property.SCFTJZMJ}</td></tr>`;
+            _trHTML += `<tr><th>BLDROOMID</th><td>${property.BLDROOMID}</td></tr>`;
+            _trHTML += `<tr><th>Z_MAX</th><td>${property.Z_MAX}</td></tr>`;
+
             $("#viewerInfoPop tbody").html(_trHTML);
+            $("#viewerInfoPop .cesium-infoBox").addClass("cesium-infoBox-visible");
+
         },
             Cesium.ScreenSpaceEventType.LEFT_CLICK);
+    }
+
+    var temp1 = new Array();
+    function linehHghtDoor(nameId) {
+        var exists = temp1.indexOf(nameId);
+        if (exists <= -1) {
+            temp1.push(nameId);
+        } else {
+            temp1.splice(exists, 1);  //删除对应的nameID
+        }
     }
 
     //关闭viewerInfo
@@ -188,40 +161,41 @@ $(function () {
         $("#viewerInfo").fadeOut();
     })
     //关闭viewerInfo右侧弹窗
-    $("#viewerInfoPop .cesium-infoBox-close").click(function(){
+    $("#viewerInfoPop .cesium-infoBox-close").click(function () {
         $("#viewerInfoPop .cesium-infoBox").removeClass("cesium-infoBox-visible");
-        silhouetteInfoGreen.selected = [];
+        // silhouetteInfoGreen.selected = [];
     })
 
 })
 
 
 //右击实体获取当前右击实体详情
-function getViewerInfo() {
-    // silhouetteInfoBlue.selected = [];
-    viewerInfo.imageryLayers.remove(viewerInfo.imageryLayers.get(0));
-    viewerInfo.imageryLayers.removeAll();
+function getViewerInfo(zrzguid, sjc) {
     //加载数据
     var doorOptions = {
         clampToGround: true,
         geocoder: true,
     };
-    var door = new Cesium.Cesium3DTileset({
-        url: "./Source/SampleData/3dTiles/floor/tileset.json",
+
+    var door = Cesium.GeoJsonDataSource.load(`${port}service/getHuData?zrzguid=${zrzguid}&sjc=${sjc}`);
+    door.then(function (dataSource) {
+        viewerInfo.dataSources.add(dataSource);
+        var entities = dataSource.entities.values;
+        //可对单个实体进行设置
+        for (var i = 0; i < entities.length; i++) {
+            var entity = entities[i];
+            entity.nameId = i;
+            entity.polygon.material = Cesium.Color.BLUE;
+            entity.polygon.outline = false;
+            // entity.polygon.extrudedHeight = 300;
+            entity.polygon.extrudedHeight = entity.properties.HEIGHT;
+        }
     });
-    viewerInfo.flyTo(viewerInfo.scene.primitives.add(door, doorOptions));
+    // var door = new Cesium.Cesium3DTileset({
+    //     url: "./Source/SampleData/3dTiles/floor/tileset.json",
+    // });
+    viewerInfo.flyTo(door);
 
-    // layui.use(['layer'], function () {
-    //     var layer = layui.layer;
-
-    //     layer.open({
-    //         type: 1,
-    //         shade: [0.4, '#000'],
-    //         title: '查看详情',
-    //         area: ['90%', '90%'],
-    //         content: $("#viewerInfo"), //这里content是一个普通的String
-    //     });
-
-    // })
 }
+console.log(zrzguid);
 

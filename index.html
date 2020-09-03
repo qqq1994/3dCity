@@ -24,7 +24,7 @@
     <!-- A container for the Cesium Viewer to live in. -->
     <div id="cesiumContainer">
         <!-- 自定义搜索框 -->
-        <!-- <div class="viewer-search">
+        <div class="viewer-search">
             <input type="text" placeholder="搜索">
             <button type="button" class="cesium-button cesium-toolbar-button cesium-home-button search-button"
                 id="searchBtn">
@@ -35,7 +35,11 @@
                         p-id="1174" fill="#ffffff"></path>
                 </svg>
             </button>
-        </div> -->
+            <div class="search-box">
+                <div class="search-item search-selected">123</div>
+                <div class="search-item">456</div>
+            </div>
+        </div>
         <ul class="menu-list" id="menuList">
             <li class="li-item">
                 <a href="javaScript:;">查看历史</a>
@@ -45,6 +49,9 @@
             </li>
         </ul>
     </div>
+    <!-- <div class="loading viewer-loading"> -->
+    <img class="loading viewer-loading" src="./Source/Images/ajax-loader.gif" width="32px" height="32px" />
+    <!-- </div> -->
 
     <!-- Some input elements for our app. -->
     <div class="backdrop" id="menu">
@@ -79,11 +86,8 @@
     <script src="Source/jquery-3.3.1.min.js"></script>
     <script src="Source/Cesium/Cesium.js"></script>
     <script src="Source/jqueryMouseWheel.js"></script>
-    <!-- <script src="Source/viewer.js"></script> -->
     <script src="Source/geojson.js"></script>
-    <!-- <script src="Source/a.js"></script> -->
-    <!-- <script src="Source/kml.js"></script> -->
-    <!-- <script src="Source/viewerInfo.js"></script> -->
+    <script src="Source/viewerInfo.js"></script>
 </body>
 
 </html>
