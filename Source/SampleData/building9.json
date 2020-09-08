@@ -105,7 +105,7 @@
                 "SimPgnFlag": 0,
                 "MaxSimpTol": 9,
                 "MinSimpTol": 9,
-                "height": 18
+                "HEIGHT": 18
             }
         }
     ]

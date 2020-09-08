@@ -103,7 +103,7 @@ $(function () {
         viewerInfo.screenSpaceEventHandler.setInputAction(function onLeftClick(
             movement
         ) {
-            $("#cesiumContainer .cesium-infoBox").removeClass("cesium-infoBox-visible");
+            $("#messageBox .cesium-infoBox").removeClass("cesium-infoBox-visible");
             var pickedFeature = viewerInfo.scene.pick(movement.position);
             // 清空选中
             if (highlightDoor) {//是否存在高亮面
@@ -111,8 +111,7 @@ $(function () {
             }
             if (!Cesium.defined(pickedFeature)) {
                 clickHandler(movement);
-                $("#cesiumContainer .cesium-infoBox").removeClass("cesium-infoBox-visible");
-                $("#viewerInfoPop .cesium-infoBox").removeClass("cesium-infoBox-visible");
+                $("#messageBox .cesium-infoBox").removeClass("cesium-infoBox-visible");
                 return;
             }
 
@@ -125,7 +124,7 @@ $(function () {
             var featureName = pickedFeature.id.properties.ZL;
             var property = pickedFeature.id.properties;
             // var fileds = pickedFeature.id.properties.propertyNames;
-            $("#viewerInfoPop .cesium-infoBox-title").text(featureName);
+            $("#messageBox .cesium-infoBox-title").text(featureName);
             var _trHTML = "";
             _trHTML += `<tr><th>PZYT</th><td>${property.PZYT}</td></tr>`;
             _trHTML += `<tr><th>QSXZ</th><td>${property.QSXZ}</td></tr>`;
@@ -139,8 +138,8 @@ $(function () {
             _trHTML += `<tr><th>BLDROOMID</th><td>${property.BLDROOMID}</td></tr>`;
             _trHTML += `<tr><th>Z_MAX</th><td>${property.Z_MAX}</td></tr>`;
 
-            $("#viewerInfoPop tbody").html(_trHTML);
-            $("#viewerInfoPop .cesium-infoBox").addClass("cesium-infoBox-visible");
+            $("#messageBox tbody").html(_trHTML);
+            $("#messageBox .cesium-infoBox").addClass("cesium-infoBox-visible");
 
         },
             Cesium.ScreenSpaceEventType.LEFT_CLICK);
@@ -161,11 +160,10 @@ $(function () {
         $("#viewerInfo").fadeOut();
     })
     //关闭viewerInfo右侧弹窗
-    $("#viewerInfoPop .cesium-infoBox-close").click(function () {
-        $("#viewerInfoPop .cesium-infoBox").removeClass("cesium-infoBox-visible");
+    $("#messageBox .cesium-infoBox-close").click(function () {
+        $("#messageBox .cesium-infoBox").removeClass("cesium-infoBox-visible");
         // silhouetteInfoGreen.selected = [];
     })
-
 })
 
 
@@ -197,5 +195,4 @@ function getViewerInfo(zrzguid, sjc) {
     viewerInfo.flyTo(door);
 
 }
-console.log(zrzguid);
 

@@ -182,9 +182,6 @@ var isSelected = false;//是否选中实体
 
         }
     })
-
-
-
     // 鼠标划过时显示
     var nameOverlay = document.createElement("div");
     viewer.container.appendChild(nameOverlay);

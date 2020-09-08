@@ -2,7 +2,6 @@ const port = `http://10.0.2.148:8081/`;
 var viewer;
 var initialPosition;
 var initialOrientation;
-var viewerOptions;
 //监听地图缩放
 //页面加载完成时的高度
 var isFirstLoad = true;
@@ -32,7 +31,7 @@ var sjc;
         timeline: false, //是否显示时间线控件
         fullscreenButton: false, //是否全屏显示
         scene3DOnly: true, //如果设置为true，则所有几何图形以3D模式绘制以节约GPU资源
-        infoBox: true, //是否显示点击要素之后显示的信息
+        infoBox: false, //是否显示点击要素之后显示的信息
         sceneModePicker: true, //是否显示投影方式控件  三维/二维
         navigationInstructionsInitiallyVisible: false,
         navigationHelpButton: true, //是否显示帮助信息控件
@@ -61,6 +60,8 @@ var sjc;
 
     translate(viewer);//汉化组件
 
+
+
     /**
      * 更改默认的鼠标操作
      * rotateEventTypes/平移视图  tiltEventTypes/旋转视图  zoomEventTypes/缩放视图
@@ -72,17 +73,30 @@ var sjc;
     viewer.scene.screenSpaceCameraController.tiltEventTypes = [Cesium.CameraEventType.RIGHT_DRAG];//按住右键+拖动
 
     //默认位置
+    // initialPosition = Cesium.Cartesian3.fromDegrees(
+    //     108.383727,
+    //     22.780040,
+    //     2000
+    // );
 
     initialPosition = Cesium.Cartesian3.fromDegrees(
-        108.383727,
-        22.780040,
+        108.390527,
+        22.680040,
         2000
     );
+    //默认方向
     initialOrientation = new Cesium.HeadingPitchRoll.fromDegrees(
-        18.1077496389876024807,
-        -18.987223091598949054,
-        0.825883251314954971306
+        1.7293031349556482,//heading
+        -0.04337772423825692,//pitch
+        0.00236840044668174//roll
     );
+
+    // initialOrientation = new Cesium.HeadingPitchRoll.fromDegrees(
+    //     1.8921123520664025,
+    //     0.3981247510198543,
+    //     -0.009065039257373815
+    // );
+
     //主页视图
     var homeCameraView = {
         destination: initialPosition,
@@ -94,6 +108,8 @@ var sjc;
     };
     //设置主页视图
     viewer.scene.camera.setView(homeCameraView);
+    // viewer.camera.positionCartographic.height = 378.50470146840286;
+    // viewer.camera.zoomIn((378.50470146840286));
 
     // Override the default home button
     //回到主页按钮
@@ -105,39 +121,81 @@ var sjc;
         isLoadFloor = true;
     });
 
-    // 加载数据
-    viewerOptions = {
-        clampToGround: true,
-        geocoder: true,
-    };
-
     viewer.scene.camera.setView({
         destination: initialPosition,
         orientation: initialOrientation,
         endTransform: Cesium.Matrix4.IDENTITY,
     });
+    var geojsonOptions = {
+        clampToGround: true
+    };
+    loadData(bulidType, Xmin, Xmax, Ymin, Ymax);
     //加载幢/层数据
     function loadData(type, Xmin, Xmax, Ymin, Ymax) {
-        $("#cesiumContainer .cesium-infoBox").removeClass("cesium-infoBox-visible");//每次加载新数据时都隐藏掉信息框
-        promise = Cesium.GeoJsonDataSource.load(`${port}service/DataSets?buildingType=${type}&Xmin=${Xmin}&Xmax=${Xmax}&Ymin=${Ymin}&Ymax=${Ymax}`);
-        promise.then(function (dataSource) {
-            viewer.dataSources.remove(lastDataSource);
-            lastDataSource = dataSource;
-            viewer.dataSources.add(dataSource);
-            var entities = dataSource.entities.values;
-            //可对单个实体进行设置
-            for (var i = 0; i < entities.length; i++) {
-                var entity = entities[i];
-                entity.nameId = i;
-                entity.polygon.material = Cesium.Color.BLUE;
-                entity.polygon.outline = false;
-                // entity.polygon.extrudedHeight = 300;
-                entity.polygon.extrudedHeight = entity.properties.HEIGHT;
+        $("#loading").show();
+        $("#messageBox .cesium-infoBox").removeClass("cesium-infoBox-visible");//每次加载新数据时都隐藏掉信息框
+        // promise = Cesium.GeoJsonDataSource.load(`${port}service/DataSets?buildingType=${type}&Xmin=${Xmin}&Xmax=${Xmax}&Ymin=${Ymin}&Ymax=${Ymax}`);
+        promise = Cesium.GeoJsonDataSource.load(`./Source/SampleData/building9.json`, geojsonOptions);
+        $.ajax({
+            type: "GET",
+            url: "./Source/SampleData/building9.json",
+            success: (data) => {
+                // console.log(data);
+                var obj = data;
+                promise = Cesium.GeoJsonDataSource.load(obj, geojsonOptions);
+                promise.then(function (dataSource) {
+                    viewer.dataSources.remove(lastDataSource);
+                    lastDataSource = dataSource;
+                    viewer.dataSources.add(dataSource);
+                    var entities = dataSource.entities.values;
+                    //可对单个实体进行设置
+                    for (var i = 0; i < entities.length; i++) {
+                        var entity = entities[i];
+                        entity.nameId = i;
+                        entity.polygon.material = Cesium.Color.WHITE;
+                        entity.polygon.outline = false;
+                        // entity.polygon.extrudedHeight = 300;
+                        entity.polygon.extrudedHeight = entity.properties.HEIGHT * 5;
+                    }
+                });
+                if (isFirstLoad) {//第一次加载
+                    // viewer.flyTo(promise);
+                    // viewer.zoomTo(promise);
+                    isFirstLoad = false;
+                }
+                $("#loading").hide();
+            },
+            error: (error) => {
+                $("#loading").hide();
+                console.log(error);
             }
-        });
-        // viewer.flyTo(promise);
+        })
     }
+
+
+    // promise = Cesium.GeoJsonDataSource.load(`./Source/SampleData/building9.json`, geojsonOptions);
+    // promise.then(function (dataSource) {
+    //     viewer.dataSources.remove(lastDataSource);
+    //     lastDataSource = dataSource;
+    //     viewer.dataSources.add(dataSource);
+    //     var entities = dataSource.entities.values;
+    //     //可对单个实体进行设置
+    //     for (var i = 0; i < entities.length; i++) {
+    //         var entity = entities[i];
+    //         entity.nameId = i;
+    //         entity.polygon.material = Cesium.Color.WHITE;
+    //         entity.polygon.outline = false;
+    //         entity.polygon.extrudedHeight = 300;
+    //         // entity.polygon.extrudedHeight = entity.properties.HEIGHT;
+    //     }
+    // });
     // viewer.flyTo(promise);
+
+
+
+
+    // viewer.zoomIn(promise);
+    // viewer.camera.zoomIn(5000);
 
     //获取屏幕经纬度
     var w = $(window).width();//网页可视区域的宽
@@ -151,29 +209,29 @@ var sjc;
     var helper = new Cesium.EventHelper();
     helper.add(viewer.scene.globe.tileLoadProgressEvent, function (event) {
         if (event == 0) {//地球加载完成
-            //屏幕坐标
-            var pt1 = new Cesium.Cartesian2(0, 0);
-            var pt2 = new Cesium.Cartesian2(w, h);
-            var pt3 = new Cesium.Cartesian2(0, h);
-            var pt4 = new Cesium.Cartesian2(w, 0);
+            // //屏幕坐标
+            // var pt1 = new Cesium.Cartesian2(0, 0);
+            // var pt2 = new Cesium.Cartesian2(w, h);
+            // var pt3 = new Cesium.Cartesian2(0, h);
+            // var pt4 = new Cesium.Cartesian2(w, 0);
 
-            //笛卡尔空间直角坐标
-            var pick1 = viewer.scene.globe.pick(viewer.camera.getPickRay(pt1), viewer.scene);
-            var pick2 = viewer.scene.globe.pick(viewer.camera.getPickRay(pt2), viewer.scene);
+            // //笛卡尔空间直角坐标
+            // var pick1 = viewer.scene.globe.pick(viewer.camera.getPickRay(pt1), viewer.scene);
+            // var pick2 = viewer.scene.globe.pick(viewer.camera.getPickRay(pt2), viewer.scene);
 
-            var pick3 = viewer.scene.globe.pick(viewer.camera.getPickRay(pt3), viewer.scene);
-            var pick4 = viewer.scene.globe.pick(viewer.camera.getPickRay(pt4), viewer.scene);
-            //转换为经纬度
-            var geoPt1 = viewer.scene.globe.ellipsoid.cartesianToCartographic(pick1);
-            var geoPt2 = viewer.scene.globe.ellipsoid.cartesianToCartographic(pick2);
+            // var pick3 = viewer.scene.globe.pick(viewer.camera.getPickRay(pt3), viewer.scene);
+            // var pick4 = viewer.scene.globe.pick(viewer.camera.getPickRay(pt4), viewer.scene);
+            // //转换为经纬度
+            // var geoPt1 = viewer.scene.globe.ellipsoid.cartesianToCartographic(pick1);
+            // var geoPt2 = viewer.scene.globe.ellipsoid.cartesianToCartographic(pick2);
 
-            var geoPt3 = viewer.scene.globe.ellipsoid.cartesianToCartographic(pick3);
-            var geoPt4 = viewer.scene.globe.ellipsoid.cartesianToCartographic(pick4);
-            Xmax = Cesium.Math.toDegrees(geoPt1.latitude);//纬度最大
-            Ymin = Cesium.Math.toDegrees(geoPt1.longitude)//经度最小
-            Xmin = Cesium.Math.toDegrees(geoPt2.latitude);//纬度最小
-            Ymax = Cesium.Math.toDegrees(geoPt2.longitude)//经度最大
-            loadData(bulidType, Xmin, Xmax, Ymin, Ymax);
+            // var geoPt3 = viewer.scene.globe.ellipsoid.cartesianToCartographic(pick3);
+            // var geoPt4 = viewer.scene.globe.ellipsoid.cartesianToCartographic(pick4);
+            // Xmax = Cesium.Math.toDegrees(geoPt1.latitude);//纬度最大
+            // Ymin = Cesium.Math.toDegrees(geoPt1.longitude)//经度最小
+            // Xmin = Cesium.Math.toDegrees(geoPt2.latitude);//纬度最小
+            // Ymax = Cesium.Math.toDegrees(geoPt2.longitude)//经度最大
+            // loadData(bulidType, Xmin, Xmax, Ymin, Ymax);
         }
     });
 
@@ -227,6 +285,22 @@ var sjc;
         viewer.screenSpaceEventHandler.setInputAction(function onLeftClick(
             movement
         ) {
+
+            // var windowPosition = movement.position;
+            // console.log(windowPosition);
+            // //转换为笛卡尔空间直角坐标
+            // var ray = viewer.camera.getPickRay(windowPosition);
+            // var cartesian = viewer.scene.globe.pick(ray, viewer.scene);
+            // console.log(cartesian);
+
+
+            // //三维笛卡尔空间直角坐标转换为地理坐标（经纬度）
+            // var ellipsoid = viewer.scene.globe.ellipsoid;
+            // var cartographic = ellipsoid.cartesianToCartographic(cartesian);
+            // console.log(cartographic);
+
+
+            // $("#cesiumContainer .cesium-infoBox").removeClass("cesium-infoBox-visible");//隐藏信息框
             $("#menuList").hide();//不管当前是否显示右击时的菜单一律隐藏
             var pickedFeature = viewer.scene.pick(movement.position);
             if (highlightFace) {//是否存在高亮面
@@ -235,7 +309,8 @@ var sjc;
             if (!Cesium.defined(pickedFeature)) {//点击非实体区域时
                 clickHandler(movement);
                 $("#viewerInfo").fadeOut();//不管当前是否显示户数据弹窗一律隐藏
-                $("#cesiumContainer .cesium-infoBox").removeClass("cesium-infoBox-visible");//隐藏信息框
+                // $("#cesiumContainer .cesium-infoBox").removeClass("cesium-infoBox-visible");//隐藏信息框
+                $("#messageBox .cesium-infoBox").removeClass("cesium-infoBox-visible");
                 highlightFace = false;
                 return;
             }
@@ -246,31 +321,57 @@ var sjc;
             highlightFace = pickedFeature.id.polygon;
             linehHghtlight(pickedFeature.id);
 
+
             // // 设置所选实体显示的功能信息框
-            selectedEntity.description =
-                'Loading <div class="cesium-infoBox-loading"></div>';
-            viewer.selectedEntity = selectedEntity;
-            var descriptionStr = '<table class="cesium-infoBox-defaultTable"><tbody>';
+
             var property = pickedFeature.id.properties;
-            selectedEntity.name = property.ZDGUID;
-            descriptionStr += "<tr><th>OBJECTID</th><td>" + property.OBJECTID + "</td></tr>";
-            descriptionStr += "<tr><th>ZDGUID</th><td>" + property.ZDGUID + "</td></tr>";
-            descriptionStr += "<tr><th>OBJECTID_1</th><td>" + property.OBJECTID_1 + "</td></tr>";
-            descriptionStr += "<tr><th>Z_MEAN</th><td>" + property.Z_MEAN + "</td></tr>";
-            descriptionStr += "<tr><th>ZCS</th><td>" + property.ZCS + "</td></tr>";
-            descriptionStr += "<tr><th>ID</th><td>" + property.ID + "</td></tr>";
-            descriptionStr += "<tr><th>HEIGHT</th><td>" + property.HEIGHT + "</td></tr>";
-            descriptionStr += "<tr><th>SPLIT</th><td>" + property.SPLIT + "</td></tr>";
-            descriptionStr += "<tr><th>Z_MIN</th><td>" + property.Z_MIN + "</td></tr>";
-            descriptionStr += "<tr><th>ZRZGUID</th><td>" + property.ZRZGUID + "</td></tr>";
-            descriptionStr += "<tr><th>Z_MAX</th><td>" + property.Z_MAX + "</td></tr>";
+            var featureName = property.ZDGUID;
+            // var fileds = pickedFeature.id.properties.propertyNames;
+            $("#messageBox .cesium-infoBox-title").text(featureName);
+            var _trHTML = "";
+
+            // // 设置所选实体显示的功能信息框
+            // selectedEntity.description =
+            //     'Loading <div class="cesium-infoBox-loading"></div>';
+            // viewer.selectedEntity = selectedEntity;
+            // var descriptionStr = '<table class="cesium-infoBox-defaultTable"><tbody>';
+            // var property = pickedFeature.id.properties;
+            // selectedEntity.name = property.ZDGUID;
+            // descriptionStr += "<tr><th>OBJECTID</th><td>" + property.OBJECTID + "</td></tr>";
+            // descriptionStr += "<tr><th>ZDGUID</th><td>" + property.ZDGUID + "</td></tr>";
+            // descriptionStr += "<tr><th>OBJECTID_1</th><td>" + property.OBJECTID_1 + "</td></tr>";
+            // descriptionStr += "<tr><th>Z_MEAN</th><td>" + property.Z_MEAN + "</td></tr>";
+            // descriptionStr += "<tr><th>ZCS</th><td>" + property.ZCS + "</td></tr>";
+            // descriptionStr += "<tr><th>ID</th><td>" + property.ID + "</td></tr>";
+            // descriptionStr += "<tr><th>HEIGHT</th><td>" + property.HEIGHT + "</td></tr>";
+            // descriptionStr += "<tr><th>SPLIT</th><td>" + property.SPLIT + "</td></tr>";
+            // descriptionStr += "<tr><th>Z_MIN</th><td>" + property.Z_MIN + "</td></tr>";
+            // descriptionStr += "<tr><th>ZRZGUID</th><td>" + property.ZRZGUID + "</td></tr>";
+            // descriptionStr += "<tr><th>Z_MAX</th><td>" + property.Z_MAX + "</td></tr>";
+            _trHTML += `<tr><th>OBJECTID</th><td>${property.OBJECTID}</td></tr>`;
+            _trHTML += `<tr><th>ZDGUID</th><td>${property.ZDGUID}</td></tr>`;
+            _trHTML += `<tr><th>OBJECTID_1</th><td>${property.OBJECTID_1}</td></tr>`;
+            _trHTML += `<tr><th>Z_MEAN</th><td>${property.Z_MEAN}</td></tr>`;
+            _trHTML += `<tr><th>ZCS</th><td>${property.ZCS}</td></tr>`;
+            _trHTML += `<tr><th>ID</th><td>${property.ID}</td></tr>`;
+            _trHTML += `<tr><th>HEIGHT</th><td>${property.HEIGHT}</td></tr>`;
+            _trHTML += `<tr><th>SPLIT</th><td>${property.SPLIT}</td></tr>`;
+            _trHTML += `<tr><th>Z_MIN</th><td>${property.Z_MIN}</td></tr>`;
+            _trHTML += `<tr><th>ZRZGUID</th><td>${property.ZRZGUID}</td></tr>`;
+            _trHTML += `<tr><th>Z_MAX</th><td>${property.Z_MAX}</td></tr>`;
+
+
             if (bulidType === "zhuang") {//幢数据
-                descriptionStr += "<tr><th>ZRZGUID2</th><td>" + property.ZRZGUID2 + "</td></tr>";
+                // descriptionStr += "<tr><th>ZRZGUID2</th><td>" + property.ZRZGUID2 + "</td></tr>";
+                _trHTML += `<tr><th>ZRZGUID2</th><td>${property.ZRZGUID2}</td></tr>`;
             } else {//层数据
-                descriptionStr += "<tr><th>SJC</th><td>" + property.SJC + "</td></tr>";
+                // descriptionStr += "<tr><th>SJC</th><td>" + property.SJC + "</td></tr>";
+                _trHTML += `<tr><th>SJC</th><td>${property.SJC}</td></tr>`;
             }
-            descriptionStr += "</tbody></table>";
-            selectedEntity.description = descriptionStr;
+            // descriptionStr += "</tbody></table>";
+            // selectedEntity.description = descriptionStr;
+            $("#messageBox tbody").html(_trHTML);
+            $("#messageBox .cesium-infoBox").addClass("cesium-infoBox-visible");
         },
             Cesium.ScreenSpaceEventType.LEFT_CLICK);
 
@@ -278,7 +379,7 @@ var sjc;
         viewer.screenSpaceEventHandler.setInputAction(function onRightClick(
             movement
         ) {
-            $("#cesiumContainer .cesium-infoBox").removeClass("cesium-infoBox-visible");
+            $("#messageBox .cesium-infoBox").removeClass("cesium-infoBox-visible");
             var pickedFeature = viewer.scene.pick(movement.position);
             if (!Cesium.defined(pickedFeature)) {
                 $("#menuList").hide();
@@ -314,67 +415,143 @@ var sjc;
         }
     }
     //监听滚轮滚动
-    $("#cesiumContainer").mousewheel(function (e, d) {//d=1 上; d=-1 下
-        $("#menuList").hide();
-        wheelLevel += d;
-        console.log(wheelLevel);
-        if (d === 1) {//放大
-            if (wheelLevel > 10) {
-                wheelLevel = 9;
-                viewer.scene.screenSpaceCameraController.enableZoom = false;
-            }
-            if (wheelLevel < 9) {
-                viewer.scene.screenSpaceCameraController.enableZoom = true;
-            }
-        }
-        else {//缩小
-            if (wheelLevel < 10) {
-                viewer.scene.screenSpaceCameraController.enableZoom = true;
-            }
-            if (wheelLevel < 1) {
-                wheelLevel = 1;
-                viewer.scene.screenSpaceCameraController.enableZoom = false;
-            }
-        }
-        if (wheelLevel === 6) {
-            bulidType = "ceng";
-        }
-        if (wheelLevel === 5) {
-            bulidType = "zhuang";
-        }
-    });//wheel结束
+    // $("#cesiumContainer").mousewheel(function (e, d) {//d=1 上; d=-1 下
+    //     $("#menuList").hide();
+    //     wheelLevel += d;
+    //     console.log(wheelLevel);
+    //     if (d === 1) {//放大
+    //         if (wheelLevel > 10) {
+    //             wheelLevel = 9;
+    //             viewer.scene.screenSpaceCameraController.enableZoom = false;
+    //         }
+    //         if (wheelLevel < 9) {
+    //             viewer.scene.screenSpaceCameraController.enableZoom = true;
+    //         }
+    //     }
+    //     else {//缩小
+    //         if (wheelLevel < 10) {
+    //             viewer.scene.screenSpaceCameraController.enableZoom = true;
+    //         }
+    //         if (wheelLevel < 1) {
+    //             wheelLevel = 1;
+    //             viewer.scene.screenSpaceCameraController.enableZoom = false;
+    //         }
+    //     }
+    //     if (wheelLevel === 6) {
+    //         bulidType = "ceng";
+    //     }
+    //     if (wheelLevel === 5) {
+    //         bulidType = "zhuang";
+    //     }
+    // });//wheel结束
 
-    var searchArr = ["栗子","苹果","梨子"];
+    var list = ["栗子", "苹果", "梨子", "瓜子", "粒子", "分子"];
 
-    //自定义搜索框事件方法
-    var isClickBtn = false;
-    $("#searchBtn").hover(function () {
-        $(this).addClass("hover");
-        $(".viewer-search input").addClass("show");
-        $(".viewer-search input").focus();
-    })
-    $("#searchBtn").click(function () {
-        // console.log()
-        if ($(".viewer-search input").val() == "") {
-            // $(".viewer-search input").focus();
-            isClickBtn = true;
-            console.log(1111111111);
-        }
-    })
-    $(".viewer-search input").focus(function () {
-        $("#searchBtn").addClass("active");
-    })
-    $(".viewer-search input").blur(function () {
-        if (!isClickBtn) {
-            if ($(this).val() == "") {
-                $(".viewer-search input").removeClass("show");
-                setTimeout(function () {
-                    $("#searchBtn").removeClass("active hover");
-                }, 300)
+    //监听自定义search
+    /**
+     * 使用indexof方法实现模糊查询
+     * @param  {Array}  list     进行查询的数组
+     * @param  {String} keyWord  查询的关键词
+     * @return {Array}           查询的结果
+     */
+    function fuzzyQuery(list, keyWord) {
+        var arr = [];
+        for (var i = 0; i < list.length; i++) {
+            if (list[i].indexOf(keyWord) >= 0) {
+                arr.push(list[i]);
             }
         }
-        $("#searchBtn").removeClass("active");
+        return arr;
+    }
+    var isMatchList = false;
+    $("#searchICon").click(function () {
+        isMatchList = false;
+        var val = $("#viewerSearch input").val();
+        if (val != "") {
+            $("#viewerSearch input").val("Searching...");
+            setTimeout(function () {
+                var matchArr = fuzzyQuery(list, val);
+                listL = matchArr.length;
+                if (listL != 0) {
+                    isMatchList = true;
+                    $("#viewerSearch input").val(val);
+                    var listHTML = "";
+                    for (const item of matchArr) {
+                        listHTML += `<div class="search-item">${item}</div>`
+                    }
+                    $(".search-box").html(listHTML);
+                    $(".search-box .search-item").eq(0).addClass("selected");
+                    $(".search-box").show();
+                    $("#viewerSearch input").blur();
+                } else {
+                    isMatchList = false;
+                    $("#viewerSearch input").val(`${val}（no found）`)
+                }
+            }, 1000)
+        }
     })
+    function aa(val) {
+        $("#viewerSearch input").val(val);
+    }
+    //失去焦点
+    $("#viewerSearch input").blur(function () {
+        isFocus = false;
+    })
+    //获得焦点
+    var isFocus = true;
+    $("#viewerSearch input").focus(function () {
+        isFocus = true;
+    })
+    //监听回车键
+    // document.onkeydown = function (event) {
+    //     var e = event || window.event || arguments.callee.caller.arguments[0];
+    //     if (e && e.keyCode == 13) {
+
+    //     }
+    // };
+    $(".search-box").on("click", ".search-item", function () {
+        $(".search-box").hide();
+        aa($(this).text());
+    })
+    //监听键盘
+    var listL = 0;
+    var index = $(".search-box .selected").index();
+    document.onkeydown = function (ev) {
+        var ev = ev || window.event;
+        switch (ev.keyCode) {
+            case 13://回车键
+                if (isFocus) {
+                    $("#searchICon").click();
+                }
+                if (isMatchList) {
+                    $(".search-box").hide();
+                    aa($(".search-box .selected").text());
+                }
+            case 38://方向键（上）
+                if (isMatchList) {
+                    if (index == 0) {
+                        index = 0;
+                    } else {
+                        index = index - 1;
+                    }
+                    $(".search-box .search-item").removeClass("selected");
+                    $(".search-box .search-item").eq(index).addClass("selected");
+                }
+            case 40://方向键（下）
+                if (isMatchList) {
+                    if (index == listL - 1) {
+                        index = listL - 1;
+                    } else {
+                        index = index + 1;
+                    }
+                    $(".search-box .search-item").removeClass("selected");
+                    $(".search-box .search-item").eq(index).addClass("selected");
+                }
+            default:
+                break;
+        }
+    }
+
 }());
 //右击菜单监听选择查看层/户详情
 function viewDetail() {
