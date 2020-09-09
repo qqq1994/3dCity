@@ -31,7 +31,7 @@ var sjc;
         timeline: false, //是否显示时间线控件
         fullscreenButton: false, //是否全屏显示
         scene3DOnly: true, //如果设置为true，则所有几何图形以3D模式绘制以节约GPU资源
-        infoBox: false, //是否显示点击要素之后显示的信息
+        infoBox: true, //是否显示点击要素之后显示的信息
         sceneModePicker: true, //是否显示投影方式控件  三维/二维
         navigationInstructionsInitiallyVisible: false,
         navigationHelpButton: true, //是否显示帮助信息控件
@@ -481,6 +481,7 @@ var sjc;
                     }
                     $(".search-box").html(listHTML);
                     $(".search-box .search-item").eq(0).addClass("selected");
+                    index = 0;
                     $(".search-box").show();
                     $("#viewerSearch input").blur();
                 } else {
@@ -502,20 +503,13 @@ var sjc;
     $("#viewerSearch input").focus(function () {
         isFocus = true;
     })
-    //监听回车键
-    // document.onkeydown = function (event) {
-    //     var e = event || window.event || arguments.callee.caller.arguments[0];
-    //     if (e && e.keyCode == 13) {
-
-    //     }
-    // };
     $(".search-box").on("click", ".search-item", function () {
         $(".search-box").hide();
         aa($(this).text());
     })
     //监听键盘
     var listL = 0;
-    var index = $(".search-box .selected").index();
+    var index;
     document.onkeydown = function (ev) {
         var ev = ev || window.event;
         switch (ev.keyCode) {
@@ -527,25 +521,31 @@ var sjc;
                     $(".search-box").hide();
                     aa($(".search-box .selected").text());
                 }
+                break;
             case 38://方向键（上）
                 if (isMatchList) {
+                    console.log($(".search-box").scrollTop());
                     if (index == 0) {
                         index = 0;
                     } else {
-                        index = index - 1;
+                        index--;
                     }
+                    $(".search-box").animate({ scrollTop: index * 49 + "px" });
                     $(".search-box .search-item").removeClass("selected");
                     $(".search-box .search-item").eq(index).addClass("selected");
                 }
+                break;
             case 40://方向键（下）
                 if (isMatchList) {
                     if (index == listL - 1) {
                         index = listL - 1;
                     } else {
-                        index = index + 1;
+                        index++;
                     }
+                    $(".search-box").animate({ scrollTop: index * 49 + "px" });
                     $(".search-box .search-item").removeClass("selected");
                     $(".search-box .search-item").eq(index).addClass("selected");
+                    break;
                 }
             default:
                 break;

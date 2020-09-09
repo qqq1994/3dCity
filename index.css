@@ -185,10 +185,12 @@ button.cesium-infoBox-camera {
     border-radius: 4px;
     padding: 6px;
     display: none;
+    overflow-y: auto;
 }
 
 .search-item {
     padding: 5px;
+    /* padding: 15px 5px; */
     color: #bababa;
     font-size: 14px;
     border-radius: 2px;
@@ -307,3 +309,15 @@ button.cesium-infoBox-camera {
     /* border-radius: 50%; */
     /* background-color: rgba(42, 42, 42, 0.7); */
 }
+/* 滚动条样式 */
+::-webkit-scrollbar{
+    width: 6px;
+    display: block !important;
+} 
+::-webkit-scrollbar-track  {  
+    border-radius: 6px;
+} 
+::-webkit-scrollbar-thumb  {  
+    border-radius: 6px;
+    background-color:rgb(193, 193, 193,.5);  
+}  
